@@ -1,0 +1,7 @@
+ativadade
+
+02) criar o procedimento armazenado que receba um número Inteiro e liste os Clientes Aniversariantes do mês.
+(proc_Aniversariantes_Mes) Resultado Nome e dia
+
+03) criar um procedimento resumo Aniversariantes, que mostre a listagem da contagem de aniversariantes por mês,
+da contagem de aniversariantes por mês. Quando o mês não tiver aniversariantes, mostrar 0
