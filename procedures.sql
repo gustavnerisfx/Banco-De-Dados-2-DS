@@ -100,6 +100,19 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE MostraClientesAniversarioPorMes
+    @mes numeric(2,0)
+AS
+BEGIN 
+    select Nome, Day(DATANASCIMENTO) as Dia from CLIENTES where Month(DATANASCIMENTO) = @mes
+END
+EXEC MostraClientesAniversarioPorMes 1;
+
+select M.mes as Mês , count(c.DATANASCIMENTO) 
+from (values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12) ) as M(mes) 
+left join CLIENTES as c on Month(c.DATANASCIMENTO) = M.mes group BY M.mes order by M.mes asc
+select Month(DATANASCIMENTO),Count(*) from CLIENTES group by Month(DATANASCIMENTO) order by Month(DATANASCIMENTO) asc 
+
 
 
 EXEC ListarClientesEspecifico 14
