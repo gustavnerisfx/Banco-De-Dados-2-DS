@@ -6,7 +6,7 @@
 	Procedure de incluir
 */
 
-ALTER PROCEDURE IncluirCliente
+CREATE PROCEDURE IncluirCliente
 
 	@RG VARCHAR(9),
 	@NOME VARCHAR(50),
