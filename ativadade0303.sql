@@ -59,3 +59,40 @@ BEGIN
 
 END
 GO
+
+
+
+CREATE TABLE dbdbVENDA (
+	ID_Venda INT NOT NULL,
+	Data_Venda DATE NOT NULL,
+	ID_Cliente INT NOT NULL,
+	ID_Produto INT NOT NULL,
+	QTD_Venda INT NOT NULL,
+	Valor_Total INT NOT NULL,
+	Numero_Parcelas INT NOT NULL
+);
+
+CREATE TABLE dbdbCOMPRA (
+	ID_Produto int identity(1,1) primary key,
+	Descricao nvarchar(40) NOT NULL,
+	Unidade varchar(2) NOT NULL
+);
+
+CREATE TABLE dbdbSALDO (
+	ID_Produto int NOT NULL,
+    Saldo_produto decimal NOT NULL
+);
+
+CREATE TRIGGER exemplo_insert
+ON dbdbVENDA
+AFTER INSERT
+AS
+BEGIN
+
+	DECLARE
+	@QTD_Venda INT
+
+	SELECT @QTD_Venda = @QTD
+
+END
+GO
