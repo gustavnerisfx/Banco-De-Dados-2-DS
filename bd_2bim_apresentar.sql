@@ -1,58 +1,25 @@
-USE bd_01
+USE db_250685
 GO
 
-
-DROP TRIGGER IF EXISTS trg_AO_Inserir_Venda
-DROP TRIGGER IF EXISTS trg_SubtrairSaldo
-DROP TRIGGER IF EXISTS trg_SomarSaldo
-DROP TRIGGER IF EXISTS trg_AO_Inserir_Compra
-DROP TRIGGER IF EXISTS trg_Financeiro_Venda
-
-DROP PROCEDURE IF EXISTS sp_InserirProdutos
-
-DROP FUNCTION IF EXISTS dbo.fn_ProximoDiaUtil
-
-DELETE FROM Contas_A_Receber
-DELETE FROM Venda
-DELETE FROM Compra
-DELETE FROM Saldo
-DELETE FROM Produto
-DELETE FROM Cliente
-DELETE FROM Feriados_Fixos
-DELETE FROM Feriados_Do_Ano
-
-DROP TABLE IF EXISTS Contas_A_Receber
-DROP TABLE IF EXISTS Venda
-DROP TABLE IF EXISTS Compra
-DROP TABLE IF EXISTS Saldo
-DROP TABLE IF EXISTS Produto
-DROP TABLE IF EXISTS Cliente
-DROP TABLE IF EXISTS Feriados_Fixos
-DROP TABLE IF EXISTS Feriados_Do_Ano
-
-GO
-
--- tabelas
-
-CREATE TABLE Cliente (
+CREATE TABLE Cliente_dbdb (
     ID_CLIENTE INT IDENTITY(1,1) PRIMARY KEY,
     NOME       NVARCHAR(100)
 )
 
-CREATE TABLE Produto (
+CREATE TABLE Produto_dbdb (
     ID_PRODUTO INT IDENTITY(1,1) PRIMARY KEY,
     DESCRICAO  NVARCHAR(40),
     UNIDADE    VARCHAR(2)
 )
 
-CREATE TABLE Saldo (
+CREATE TABLE Saldo_dbdb (
     ID_PRODUTO    INT PRIMARY KEY,
     SALDO_PRODUTO DECIMAL(10,2),
     CONSTRAINT FK_SALDO_PRODUTO FOREIGN KEY (ID_PRODUTO)
-        REFERENCES Produto(ID_PRODUTO)
+        REFERENCES Produto_dbdb(ID_PRODUTO)
 )
 
-CREATE TABLE Venda (
+CREATE TABLE Venda_dbdb (
     ID_VENDA        INT IDENTITY(1,1) PRIMARY KEY,
     DATA_VENDA      DATE,
     ID_CLIENTE      INT,
@@ -61,12 +28,12 @@ CREATE TABLE Venda (
     VALOR_TOTAL     DECIMAL(10,2),
     NUMERO_PARCELAS INT,
     CONSTRAINT FK_VENDA_PRODUTO FOREIGN KEY (ID_PRODUTO)
-        REFERENCES Produto(ID_PRODUTO),
+        REFERENCES Produto_dbdb(ID_PRODUTO),
     CONSTRAINT FK_VENDA_CLIENTE FOREIGN KEY (ID_CLIENTE)
-        REFERENCES Cliente(ID_CLIENTE)
+        REFERENCES Cliente_dbdb(ID_CLIENTE)
 )
 
-CREATE TABLE Compra (
+CREATE TABLE Compra_dbdb (
     ID_COMPRA       INT IDENTITY(1,1) PRIMARY KEY,
     DATA_COMPRA     DATE,
     ID_FORNECEDOR   INT,
@@ -75,23 +42,23 @@ CREATE TABLE Compra (
     VALOR_TOTAL     DECIMAL(10,2),
     NUMERO_PARCELAS INT,
     CONSTRAINT FK_COMPRA_PRODUTO FOREIGN KEY (ID_PRODUTO)
-        REFERENCES Produto(ID_PRODUTO)
+        REFERENCES Produto_dbdb(ID_PRODUTO)
 )
 
-CREATE TABLE Feriados_Fixos (
+CREATE TABLE Feriados_Fixos_dbdb (
     ID_FERIADO INT IDENTITY(1,1) PRIMARY KEY,
     DIA        INT,
     MES        INT,
     DESCRICAO  NVARCHAR(50)
 )
 
-CREATE TABLE Feriados_Do_Ano (
+CREATE TABLE Feriados_Do_Ano_dbdb (
     ID_FERIADO   INT IDENTITY(1,1) PRIMARY KEY,
     DATA_FERIADO DATE,
     DESCRICAO    NVARCHAR(50)
 )
 
-CREATE TABLE Contas_A_Receber (
+CREATE TABLE Contas_A_Receber_dbdb (
     ID_PARCELA      INT IDENTITY(1,1) PRIMARY KEY,
     ID_VENDA        INT,
     NUM_PARCELA     INT,
@@ -99,14 +66,14 @@ CREATE TABLE Contas_A_Receber (
     VALOR_PARCELA   MONEY,
     DATA_PAGAMENTO  DATE,
     CONSTRAINT FK_CAR_VENDA FOREIGN KEY (ID_VENDA)
-        REFERENCES Venda(ID_VENDA)
+        REFERENCES Venda_dbdb(ID_VENDA)
 )
 
 GO
 
--- dados iniciais
 
-INSERT INTO Feriados_Fixos (DIA, MES, DESCRICAO) VALUES
+
+INSERT INTO Feriados_Fixos_dbdb (DIA, MES, DESCRICAO) VALUES
 (1,  1,  'Ano Novo'),
 (21, 4,  'Tiradentes'),
 (1,  5,  'Dia do Trabalho'),
@@ -116,7 +83,7 @@ INSERT INTO Feriados_Fixos (DIA, MES, DESCRICAO) VALUES
 (15, 11, 'Proclamacao da Republica'),
 (25, 12, 'Natal')
 
-INSERT INTO Feriados_Do_Ano (DATA_FERIADO, DESCRICAO) VALUES
+INSERT INTO Feriados_Do_Ano_dbdb (DATA_FERIADO, DESCRICAO) VALUES
 ('2025-03-03', 'Carnaval'),
 ('2025-03-04', 'Carnaval'),
 ('2025-04-18', 'Sexta-feira Santa'),
@@ -128,7 +95,7 @@ INSERT INTO Feriados_Do_Ano (DATA_FERIADO, DESCRICAO) VALUES
 
 GO
 
---function do dia util
+
 
 CREATE FUNCTION fn_ProximoDiaUtil (@DATA DATE)
 RETURNS DATE
@@ -143,7 +110,7 @@ BEGIN
         OR
 
         EXISTS (
-            SELECT 1 FROM Feriados_Fixos
+            SELECT 1 FROM Feriados_Fixos_dbdb
             WHERE DIA = DAY(@DATA_UTIL)
             AND   MES = MONTH(@DATA_UTIL)
         )
@@ -151,7 +118,7 @@ BEGIN
         OR
 
         EXISTS (
-            SELECT 1 FROM Feriados_Do_Ano
+            SELECT 1 FROM Feriados_Do_Ano_dbdb
             WHERE DATA_FERIADO = @DATA_UTIL
         )
     )
@@ -165,70 +132,58 @@ END
 GO
 
 
--- procedure para criar dois produtos
-
 CREATE PROCEDURE sp_InserirProdutos
 AS
 BEGIN
     DECLARE @ID INT
 
-    INSERT INTO Produto (DESCRICAO, UNIDADE)
+    INSERT INTO Produto_dbdb (DESCRICAO, UNIDADE)
     VALUES ('Notebook Dell', 'pc')
 
     SET @ID = SCOPE_IDENTITY()
 
-    INSERT INTO Saldo (ID_PRODUTO, SALDO_PRODUTO)
+    INSERT INTO Saldo_dbdb (ID_PRODUTO, SALDO_PRODUTO)
     VALUES (@ID, 5000)
 
-    INSERT INTO Produto (DESCRICAO, UNIDADE)
-    VALUES ('Mouse Logitech', 'pc')
-
-    SET @ID = SCOPE_IDENTITY()
-
-    INSERT INTO Saldo (ID_PRODUTO, SALDO_PRODUTO)
-    VALUES (@ID, 100)
-
     SELECT p.ID_PRODUTO, p.DESCRICAO, p.UNIDADE, s.SALDO_PRODUTO
-    FROM Produto p
-    INNER JOIN Saldo s ON p.ID_PRODUTO = s.ID_PRODUTO
+    FROM Produto_dbdb p
+    INNER JOIN Saldo_dbdb s ON p.ID_PRODUTO = s.ID_PRODUTO
 END
 
 GO
 
---trigger 1
+
 
 CREATE TRIGGER trg_SubtrairSaldo
-ON Venda
+ON Venda_dbdb
 AFTER INSERT
 AS
 BEGIN
     UPDATE S
         SET S.SALDO_PRODUTO = S.SALDO_PRODUTO - I.QTD_VENDA
-    FROM Saldo S
+    FROM Saldo_dbdb S
     INNER JOIN inserted I ON S.ID_PRODUTO = I.ID_PRODUTO
 END
 
 GO
 
---trigger 2
 
 CREATE TRIGGER trg_SomarSaldo
-ON Compra
+ON Compra_dbdb
 AFTER INSERT
 AS
 BEGIN
     UPDATE S
         SET S.SALDO_PRODUTO = S.SALDO_PRODUTO + I.QTD_COMPRA
-    FROM Saldo S
+    FROM Saldo_dbdb S
     INNER JOIN inserted I ON S.ID_PRODUTO = I.ID_PRODUTO
 END
 
 GO
 
---trigger 3
 
 CREATE TRIGGER trg_Financeiro_Venda
-ON Venda
+ON Venda_dbdb
 AFTER INSERT
 AS
 BEGIN
@@ -258,7 +213,7 @@ BEGIN
 
         SET @DATA_VENC = dbo.fn_ProximoDiaUtil(@DATA_VENC)
 
-        INSERT INTO Contas_A_Receber
+        INSERT INTO Contas_A_Receber_dbdb
             (ID_VENDA, NUM_PARCELA, DATA_VENCIMENTO, VALOR_PARCELA, DATA_PAGAMENTO)
         VALUES
             (@ID_VENDA, @CONTADOR, @DATA_VENC, @VALOR_PARCELA, NULL)
@@ -270,7 +225,7 @@ END
 GO
 
 
-INSERT INTO Cliente (NOME)
+INSERT INTO Cliente_dbdb (NOME)
 VALUES ('Joao Silva')
 
 EXEC sp_InserirProdutos
@@ -278,21 +233,19 @@ EXEC sp_InserirProdutos
 GO
 
 
--- 1 e 3
 
-INSERT INTO Venda (DATA_VENDA, ID_CLIENTE, ID_PRODUTO, QTD_VENDA, VALOR_TOTAL, NUMERO_PARCELAS)
-VALUES (GETDATE(), 1, 1, 2, 1200.00, 3)
+INSERT INTO Venda_dbdb (DATA_VENDA, ID_CLIENTE, ID_PRODUTO, QTD_VENDA, VALOR_TOTAL, NUMERO_PARCELAS)
+VALUES (GETDATE(), 1, 2, 100, 1200.00, 12)
 
-SELECT * FROM Contas_A_Receber 
-SELECT * FROM Saldo 
+SELECT * FROM Contas_A_Receber_dbdb 
+SELECT * FROM Saldo_dbdb
 
 GO
 
--- 2
 
-INSERT INTO Compra (DATA_COMPRA, ID_FORNECEDOR, ID_PRODUTO, QTD_COMPRA, VALOR_TOTAL, NUMERO_PARCELAS)
-VALUES (GETDATE(), NULL, 1, 10, 8000.00, 1)
+INSERT INTO Compra_dbdb (DATA_COMPRA, ID_FORNECEDOR, ID_PRODUTO, QTD_COMPRA, VALOR_TOTAL, NUMERO_PARCELAS)
+VALUES (GETDATE(), NULL, 2, 400, 8000.00, 1)
 
-SELECT * FROM Saldo
+SELECT * FROM Saldo_dbdb
 
 GO
